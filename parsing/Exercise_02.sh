@@ -20,7 +20,7 @@ backup_file() {
   if [[ -f "${FILE}" ]]
   then
     local BACKUP_FILE="/var/tmp/$(basename ${FILE}).$(date +%F-%N)"
-    log "Backing up ${FILE} to ${BACKUP_FILe}."
+    log "Backing up ${FILE} to ${BACKUP_FILE}."
 
     # The exit stsatus of the function will be the exit status of the cp command.
     cp -p ${FILE} ${BACKUP_FILE}
