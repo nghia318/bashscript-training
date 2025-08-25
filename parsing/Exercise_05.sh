@@ -46,5 +46,5 @@ fi
 echo "Backing up files to $DEST_DIR with $COMPRESSION compression:"
 for FILE in "${FILES[@]}"
 do 
-  echo " - $FILES "
+  echo " - $FILE"
 done
