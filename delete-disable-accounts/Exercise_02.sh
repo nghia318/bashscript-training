@@ -14,15 +14,11 @@ usage() {
     exit 1
 }
 
-# Make sure the script is executed with superuser
-if [[ "${UID}" -ne 0 ]]
-then
-  echo 'Please run with sudo or as root.' >&2
-  exit 1
-fi
+# Ensure superuser
+[[ "${UID}" -ne 0 ]] && { echo "Please run with sudo or root." >&2; exit 1;}
 
-# Parse the options
-while getops dra OPTION
+# Parse options
+while getopts "dra" OPTION
 do 
   case ${OPTION} in
     d) DELETE_USER='true' ;;
@@ -32,22 +28,18 @@ do
   esac
 done
 
-# REmove the options while leaving the remaining arguments.
 shift "$(( OPTIND - 1))"
 
-# If the user doesn't supply at least one argument, give them help.
-if [[ "${#}" -lt 1 ]]
-then 
-  usage
-fi
+# Check for at least one arg.
+[[ $# -lt 1 ]] && usage
 
-# Loop through all the usernames supplied as arguments.
-for USERNAME in "${@}"
+# Proess each username.
+for USERNAME in "$@"
 do 
   echo "Processing user: ${USERNAME}"
 
   # Make sure the UID of the account is at least 1000.
-  USERID=$(id -u ${USERNAME})
+  USERID=$(id -u ${USERNAME}) || { echo "User ${USERNAME} not exist." >&2; exit 1; }
   if [[ "${USERID}" -lt 1000 ]]
   then
     echo "Refusing to remove the ${USERNAME} account with UID ${USERID}." >&2
@@ -90,23 +82,10 @@ do
   if [[ "${DELETE_USER}" = 'true']] 
   then
     # Delete the user
-    userdel ${REMOVE_OPTION} ${USERNAME}
-
-    # Check if the userdel command succeeded.
-    if [[ "${?}" -ne 0 ]]
-    then 
-      echo "The account ${USERNAME} was NOT deleted." >&2
-      exit 1
-    else 
-      echo "The account ${USERNAME} was deleted." 
-    fi
+    userdel ${REMOVE_OPTION} "${USERNAME}" || { echo "Failed to delete ${USERNAME}." >&2; exit 1;}
+    echo "User ${USERNAME} deleted."
   else
-    chage -E 0 ${USERNAME}
-    if [[ "${?}" -ne 0 ]]
-    then
-      echo "The account ${USERNAME} was NOT disabled." >&2
-      exit 1
-    fi
+    chage -E 0 ${USERNAME} || { echo "Failed to disable ${USERNAME}."} >&2; exit 1; }
     echo "The account ${USERNAME} was disabled."
   fi
 done
