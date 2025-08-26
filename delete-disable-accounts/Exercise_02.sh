@@ -6,7 +6,7 @@ ARCHIVE_DIR='/archive'
 
 usage() {
     # Display the usage and exit
-    echo "Usage: ${0} [-dra] USER [USERNAME]..." >&2
+    echo "Usage: $0 [-dra] USER [USERNAME]..." >&2
     echo 'Disable a local Linux account.' >&2
     echo ' -d Deletes account.' >&2
     echo ' -r Removes the home dir associated with the account.' >&2
@@ -49,18 +49,7 @@ do
   # Create an archive if request to do so.
   if [[ "${ARCHIVE}" = 'true' ]]
   then
-    # Make sure the archive dir exist
-    if [[ ! -d "${ARCHIVE_DIR}" ]]
-    then
-      echo "Creating ${ARCHIVE_DIR} directory."
-      mkdir -p ${ARCHIVE_DIR}
-      if [[ "${?}" -ne 0 ]]
-      then 
-        echo "The archive dir ${ARCHIVE_DIR} could not be created." >&2
-        exit 1
-      fi
-    fi
-
+    mkdir -p "${ARCHIVE_DIR}" || { echo "Cannot create ${ARCHIVE_DIR}" >&2; exit 1; }
     # Archvie the user's home dir and move it into the ARCHVIE_DIR
     HOME_DIR="/home/${USERNAME}"
     ARCHIVE_FILE="${ARCHIVE_DIR}/${USERNAME}.tgz"
@@ -68,7 +57,7 @@ do
     then 
       echo "Archiving ${HOME_DIR} to ${ARCHIVE_FILE}"
       tar -zcf ${ARCHIVE_FILE} ${HOME_DIR} &> /dev/null
-      if [[ "${?}" -ne 0 ]]
+      if [[ $? -ne 0 ]]
       then 
         echo "Could not create ${ARCHIVE_FILE}." >&2
         exit 1
@@ -79,7 +68,8 @@ do
     fi
   fi
 
-  if [[ "${DELETE_USER}" = 'true']] 
+  # Delete or disable user
+  if [[ "${DELETE_USER}" = 'true' ]] 
   then
     # Delete the user
     userdel ${REMOVE_OPTION} "${USERNAME}" || { echo "Failed to delete ${USERNAME}." >&2; exit 1;}
