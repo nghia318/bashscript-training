@@ -38,7 +38,7 @@ done
 
 SED_CMD=""
 [[ $ADD_HEADER -eq 1 ]] && SED_CMD="1iLog processed on $TIMESTAMP\n"
-[[ $ANONYMIZE_IP -eq 1 ]] && SED_CMD="${SED_CMD}s/([0-9]{1,3}\.){3}[0-9]{1,3}/xxx.xxx.xxx.xxx/g;"
+[[ $ANONYMIZE_IP -eq 1 ]] && SED_CMD="${SED_CMD}s/([0-9]{1,3}\.){3}[0-9]{1,3}/xxx.xxx.xxx.xxx/g"
 [[ $REMOVE_FAILED -eq 1 ]] && SED_CMD="${SED_CMD}/login failed/d;"
 
 # If no operations => copy the file
